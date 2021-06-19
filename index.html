@@ -32,15 +32,12 @@
         margin: auto; 
     }
 
-
       @media (max-width:800px) {
         #mapid { 
           height: 100vh;
           /*width: 100vw;*/
           margin: auto; 
         }
-          
-        
     }
   </style>
 
@@ -52,8 +49,19 @@
             <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">
           </div>
         </div>
+        <div class="col">
+          <div class="form-group">
+            <select class="form-control" name="" id="">
+              <option value="poligono">Polígono</option>
+              <option value="circulo">Círculo</option>
+            </select>
+          </div>
+        </div>
         <div class="col-auto">
           <input name="" id="" class="btn btn-primary" type="button" value="Buscar">
+        </div>
+        <div class="col-auto">
+          <input name="" id="clean" class="btn btn-primary" type="button" value="Limpiar">
         </div>
       </div>
       <div class="row">
@@ -133,19 +141,52 @@
 
         let $button = document.querySelector(".btn");
         let $inputText = document.querySelector(".form-control");
+        let $select = document.querySelector("select");
+        let $btnLimpiar = document.querySelector("#clean");
 
         $button.addEventListener("click", e => {
-
+          
           let featureGeojson = munGeojson.features.filter(f => f.properties.NAMEUNIT == $inputText.value);
           let geoJsonLayer = L.geoJSON(featureGeojson);
 
-          geoJsonLayer.addTo(map).bindPopup("Ángel Torres USUSERO!!!");;
+          if($select.value === "circulo") {
+       
+            this.circle = L.circleMarker(geoJsonLayer.getBounds()._northEast, {
+            radius: 50,
+            color: '#5d78ff',
+            fillColor: '#f03',
+            fillOpacity: 0.2,
+            opacity: 1,
+          }).addTo(map).bindPopup("Soy un circulo.");
+
+          // Set circle always centered when map is moved.
+          this.map.on("moveend", (s) => {
+            this.circle.setLatLng(this.map.getCenter());
+          });
+
+          // todo: Set circle always centered when map is zoom in/out
+          this.map.on("zoomend", (s) => {
+            this.circle.setLatLng(this.map.getCenter());
+            console.log('test');
+          });
+          } 
+          else
+          {
+            geoJsonLayer.addTo(map).bindPopup("Soy un polígono");
+          }         
 
           setTimeout(() => {
             map.flyToBounds(geoJsonLayer.getBounds(), {
               duration: 1
             });
           }, 1000);
+
+          
+        })
+
+        $btnLimpiar.addEventListener("click", e => {
+          
+          location.reload();
 
         })
     </script>
